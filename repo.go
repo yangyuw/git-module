@@ -112,6 +112,8 @@ type CloneOptions struct {
 	// The timeout duration before giving up for each shell command execution.
 	// The default timeout duration will be used when not supplied.
 	Timeout time.Duration
+	// http_proxy for cloneOption
+	HttpProxy string
 }
 
 // Clone clones the repository from remote URL to the destination.
@@ -138,6 +140,10 @@ func Clone(url, dst string, opts ...CloneOptions) error {
 	}
 	if !opt.Bare && opt.Branch != "" {
 		cmd.AddArgs("-b", opt.Branch)
+	}
+	if opt.HttpProxy != "" {
+		cmd.AddArgs(fmt.Sprintf("--config http.proxy=%s", opt.HttpProxy))
+		cmd.AddArgs(fmt.Sprintf("--config https.proxy=%s", opt.HttpProxy))
 	}
 
 	_, err = cmd.AddArgs(url, dst).RunWithTimeout(opt.Timeout)
@@ -184,6 +190,8 @@ type PullOptions struct {
 	// The timeout duration before giving up for each shell command execution.
 	// The default timeout duration will be used when not supplied.
 	Timeout time.Duration
+	// http_proxy for cloneOption
+	HttpProxy string
 }
 
 // Pull pulls updates for the repository.
@@ -205,6 +213,10 @@ func (r *Repository) Pull(opts ...PullOptions) error {
 		if opt.Branch != "" {
 			cmd.AddArgs(opt.Branch)
 		}
+	}
+	if opt.HttpProxy != "" {
+		cmd.AddArgs(fmt.Sprintf("--config http.proxy=%s", opt.HttpProxy))
+		cmd.AddArgs(fmt.Sprintf("--config https.proxy=%s", opt.HttpProxy))
 	}
 
 	_, err := cmd.RunInDirWithTimeout(opt.Timeout, r.path)
